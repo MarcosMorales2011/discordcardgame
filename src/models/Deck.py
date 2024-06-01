@@ -1,14 +1,6 @@
 import random
+from Card import Card 
 from typing import List, Optional
-
-class Card:
-    def __init__(self, name: str, card_type: str, attributes: dict):
-        self.name = name
-        self.card_type = card_type
-        self.attributes = attributes
-
-    def __repr__(self):
-        return f"{self.name} ({self.card_type})"
 
 class Deck:
     def __init__(self):

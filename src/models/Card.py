@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     # Set an attribute
     card.set_attribute("attack", 6)
-    print(f"Updated attack value: {card.get_attribute("attack")}")
+    print(f"Updated attack value: {card.get_attribute('attack')}")
 
     # Check if an attribute exists
     has_element = card.has_attribute("element")
