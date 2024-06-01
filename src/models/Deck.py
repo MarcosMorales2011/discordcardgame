@@ -1,4 +1,3 @@
-import random
 from Card import Card 
 from typing import List, Optional
 
@@ -7,32 +6,26 @@ class Deck:
         self.cards: List[Card] = []
 
     def add_card(self, card: Card):
-        """Add a card to the deck."""
-        self.cards.append(card)
-        print(f"Added {card} to the deck.")
+        """Add a card to the deck, ensuring the deck does not exceed 60 cards."""
+        if len(self.cards) < 60:
+            self.cards.append(card)
+            # print(f"Added {card} to the deck.")
+        else:
+            print("Cannot add more cards. The deck is already at its maximum capacity of 60 cards.")
 
     def remove_card(self, card_name: str) -> Optional[Card]:
-        """Remove a card from the deck by name."""
+        """Remove a card from the deck by name, ensuring the deck is not empty."""
+        if not self.cards:
+            print("The deck is empty. No cards to remove.")
+            return None
+        
         for card in self.cards:
             if card.name == card_name:
                 self.cards.remove(card)
-                print(f"Removed {card} from the deck.")
+                # print(f"Removed {card} from the deck.")
                 return card
+        
         print(f"Card with name '{card_name}' not found in the deck.")
-        return None
-
-    def shuffle(self):
-        """Shuffle the deck."""
-        random.shuffle(self.cards)
-        print("Deck shuffled.")
-
-    def draw_card(self) -> Optional[Card]:
-        """Draw a card from the top of the deck."""
-        if self.cards:
-            drawn_card = self.cards.pop(0)
-            print(f"Drew {drawn_card} from the deck.")
-            return drawn_card
-        print("Deck is empty.")
         return None
 
     def view_deck(self):
@@ -65,10 +58,10 @@ if __name__ == "__main__":
     deck.view_deck()
 
     # Shuffle the deck
-    deck.shuffle()
+    # deck.shuffle()
 
     # Draw a card
-    deck.draw_card()
+    # deck.draw_card()
 
     # Remove a card by name
     deck.remove_card("Healing Potion")
