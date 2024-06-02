@@ -1,16 +1,52 @@
 import random
-from Deck import deck
-class Hand:
-    def shuffle(deck):
-            """Shuffle the deck."""
-            random.shuffle(deck.cards)
-            print("Deck shuffled.")
+from typing import List, Optional
+from Deck import Deck
+from Card import Card
 
-    def draw_card(deck) -> Optional[Card]:
-        """Draw a card from the top of the deck."""
+class Hand:
+    def __init__(self):
+        self.cards: List[Card] = []
+
+    def shuffle(deck: Deck):
+        """Shuffle the deck."""
+        random.shuffle(deck.cards)
+        print("Deck shuffled.")
+
+    def draw_card(self, deck: Deck) -> Optional[Card]:
+        """Draw a card from the top of the deck and add it to the hand."""
+        if len(self.cards) >= 8:
+            print("Hand is full. Cannot draw more cards.")
+            return None
+        
         if deck.cards:
             drawn_card = deck.cards.pop(0)
-            print(f"Drew {drawn_card} from the deck.")
+            self.cards.append(drawn_card)
+            print(f"Drew {drawn_card} from the deck and added it to the hand.")
             return drawn_card
+        
         print("Deck is empty.")
         return None
+
+    def place_card(self, card_name: str) -> Optional[Card]:
+        """Place a card down from the hand by name, removing it from the hand."""
+        for card in self.cards:
+            if card.name == card_name:
+                self.cards.remove(card)
+                print(f"Placed {card} from the hand.")
+                return card
+        
+        print(f"Card with name '{card_name}' not found in the hand.")
+        return None
+
+    def view_hand(self):
+        """View all cards in the hand."""
+        if self.cards:
+            print("Current hand:")
+            for card in self.cards:
+                print(f" - {card}")
+        else:
+            print("The hand is empty.")
+
+    def count(self) -> int:
+        """Get the number of cards in the hand."""
+        return len(self.cards)
