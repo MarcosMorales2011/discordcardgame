@@ -13,7 +13,7 @@ class Player:
         self.hp = 40
         self.land_played = False
         self.mana = 1
-        self.mana_pool = 0
+        self.mana_pool = 1
 
     def take_damage(self, damage: int):
         self.hp -= damage

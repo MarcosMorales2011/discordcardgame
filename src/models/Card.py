@@ -1,5 +1,5 @@
 class Card:
-    def __init__(self, name: str, card_type: str, attributes: dict):
+    def __init__(self, name: str, card_type: str, attributes: dict, cost: dict):
         """
         Initialize a card with a name, card type, and attributes.
         
@@ -10,6 +10,7 @@ class Card:
         self.name = name
         self.card_type = card_type
         self.attributes = attributes
+        self.cost = cost
         self.tapped = False
 
     def __repr__(self):
@@ -37,6 +38,15 @@ class Card:
         :return: The value of the attribute if it exists, otherwise None.
         """
         return self.attributes.get(attribute_name, None)
+    
+    def get_cost(self, mana_type: str):
+        """
+        Get the value of a specific attribute.
+        
+        :param mana_type: The name of the mana type to retrieve.
+        :return: The value of the attribute if it exists, otherwise None.
+        """
+        return self.attributes.get(mana_type, None)
             
     def set_attribute(self, attribute_name: str, value):
         """
