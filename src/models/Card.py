@@ -10,6 +10,7 @@ class Card:
         self.name = name
         self.card_type = card_type
         self.attributes = attributes
+        self.tapped = False
 
     def __repr__(self):
         """
@@ -54,6 +55,12 @@ class Card:
         :return: True if the attribute exists, otherwise False.
         """
         return attribute_name in self.attributes
+    
+    def tap(self):
+        self.tapped = True
+
+    def untap(self):
+        self.tapped = False
 
 # Example usage:
 if __name__ == "__main__":
