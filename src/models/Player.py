@@ -13,7 +13,8 @@ class Player:
         self.hp = 40
         self.land_played = False
         self.mana = 1
-        self.mana_pool = 1
+        self.max_mana = 10
+        self.resource_pool = {"Biology": 0, "Chemistry": 0, "Physics": 0, "Robotics": 0}
 
     def take_damage(self, damage: int):
         self.hp -= damage
@@ -32,6 +33,9 @@ class Player:
                 if card.card_type == "Land":
                     self.land_played = True
                 self.battlefield.append(card)
+                if card.card_type == "Resource":
+                    for resource_type, amount in card.attributes.items():
+                        self.resource_pool[resource_type] += amount
                 print(f"{self.name} placed {card} onto the battlefield.")
         else:
             print(f"{self.name} could not find {card_name} in hand to play.")
@@ -40,15 +44,24 @@ class Player:
         self.land_played = False
 
     def increase_mana(self):
-        if self.mana < 10:
+        if self.mana < self.max_mana:
             self.mana += 1
-        self.mana_pool = self.mana
         print(f"{self.name} now has {self.mana} mana.")
 
-    def use_mana(self, amount: int) -> bool:
-        if self.mana_pool >= amount:
-            self.mana_pool -= amount
-            print(f"{self.name} used {amount} mana, {self.mana_pool} remaining.")
+    def use_mana(self, cost: int) -> bool:
+        if self.mana >= cost:
+            self.mana -= cost
+            print(f"{self.name} used {cost} mana, {self.mana} remaining.")
             return True
-        print(f"{self.name} does not have enough mana. {self.mana_pool} available, {amount} needed.")
+        print(f"{self.name} does not have enough mana. {self.mana} available, {cost} needed.")
         return False
+
+    def use_resource_mana(self, cost: dict) -> bool:
+        for resource_type, amount in cost.items():
+            if self.resource_pool[resource_type] < amount:
+                print(f"{self.name} does not have enough {resource_type} mana. {self.resource_pool[resource_type]} available, {amount} needed.")
+                return False
+        for resource_type, amount in cost.items():
+            self.resource_pool[resource_type] -= amount
+        print(f"{self.name} used resource mana: {cost}. Remaining pool: {self.resource_pool}.")
+        return True
