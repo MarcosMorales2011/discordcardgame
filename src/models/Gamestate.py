@@ -1,16 +1,15 @@
-from Deck import Deck
-from Hand import Hand
+from typing import List
 from Card import Card
 from Player import Player
-from typing import Optional
 import random
 
-class GameState:
+class Gamestate:
     def __init__(self, player1: Player, player2: Player):
         self.player1 = player1
         self.player2 = player2
         self.current_player, self.opponent = self.determine_first_player()
         self.phase = 'Untap'
+        self.turn_counter = 1
 
     def determine_first_player(self):
         """Randomly determine which player goes first."""
@@ -73,28 +72,47 @@ class GameState:
     def combat_phase(self):
         """Handle the Combat phase."""
         print("Entering Combat Phase.")
-        self.declare_attackers()
-        self.declare_blockers()
-        self.deal_combat_damage()
-        self.end_combat()
+        attackers = self.select_attackers()
+        if attackers:
+            self.declare_attackers(attackers)
         self.next_phase()
 
-    def declare_attackers(self):
+    def select_attackers(self) -> List[Card]:
+        """Select attackers from the current player's battlefield."""
+        print(f"{self.current_player.name}, select attackers for combat:")
+        print("Your Battlefield:")
+        for index, card in enumerate(self.current_player.battlefield, start=1):
+            print(f"{index}. {card} ({card.card_type})")
+        
+        selected_attackers = []
+        while True:
+            try:
+                selection = input("Enter the number of the card to attack with (0 to finish selecting): ")
+                index = int(selection) - 1
+                if index == -1:
+                    break
+                selected_attackers.append(self.current_player.battlefield[index])
+                print(f"{self.current_player.battlefield[index].name} selected as an attacker.")
+            except (ValueError, IndexError):
+                print("Invalid selection. Please enter a valid number.")
+
+        return selected_attackers
+
+    def declare_attackers(self, attackers: List[Card]):
         """Handle the Declare Attackers step."""
-        '''Embedded message during combat phase, player selects buttons of numbers based on creature position on their board. After selecting any number of available creatures, press checkmark. Checkmark runs this function. An array of attackers is appended with every creature added and used as the parameter for this function.'''
         print(f"{self.current_player.name} is declaring attackers.")
+        total_attack = 0
+        for attacker in attackers:
+            if attacker in self.current_player.battlefield:
+                print(f"{attacker.name} is attacking with {attacker.attributes['attack']} attack.")
+                total_attack += attacker.attributes['attack']
+            else:
+                print(f"{attacker.name} is not on the battlefield and cannot attack.")
+        self.damage_enemy_player(total_attack)
 
-    def declare_blockers(self):
-        """Handle the Declare Blockers step."""
-        print(f"{self.opponent.name} is declaring blockers.")
-
-    def deal_combat_damage(self):
-        """Handle the Combat Damage step."""
-        print("Dealing combat damage.")
-
-    def end_combat(self):
-        """Handle the End of Combat step."""
-        print("End of combat.")
+    def damage_enemy_player(self, attack_points: int):
+        self.opponent.take_damage(attack_points)
+        print(f"{self.opponent.name} took {attack_points} damage.")
 
     def end_phase(self):
         """Handle the End phase."""
@@ -135,24 +153,3 @@ class GameState:
             print(f"{winner.name} wins the game!")
             return True
         return False
-
-
-# Example usage:
-if __name__ == "__main__":
-    # Create example players with decks
-    deck1 = Deck()
-    deck2 = Deck()
-    player1 = Player(name="Alice", discord_id=12345, deck=deck1)
-    player2 = Player(name="Bob", discord_id=67890, deck=deck2)
-
-    # Add example cards to the decks
-    card1 = Card(name="Fire Elemental", card_type="Creature", attributes={"attack": 5, "defense": 4})
-    card2 = Card(name="Healing Potion", card_type="Spell", attributes={"heal": 10})
-    player1.deck.add_card(card1)
-    player2.deck.add_card(card2)
-
-    # Initialize the game state
-    game_state = GameState(player1, player2)
-
-    # Start the game
-    game_state.start_game()

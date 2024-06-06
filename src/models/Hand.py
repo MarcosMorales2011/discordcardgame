@@ -1,5 +1,5 @@
-import random
 from typing import List, Optional
+import random
 from Deck import Deck
 from Card import Card
 
@@ -50,3 +50,20 @@ class Hand:
     def count(self) -> int:
         """Get the number of cards in the hand."""
         return len(self.cards)
+
+    def draw_initial_hand(self, deck: Deck):
+        """
+        Draw the initial hand of cards from the deck.
+
+        :param deck: The deck from which to draw the initial hand.
+        """
+        while len(self.cards) < 8 and deck.cards:
+            drawn_card = deck.cards.pop(0)
+            self.cards.append(drawn_card)
+            print(f"Drew {drawn_card} from the deck and added it to the hand.")
+        print("Initial hand drawn.")
+
+    def display(self):
+        """Display the current hand of the player."""
+        self.view_hand()
+
