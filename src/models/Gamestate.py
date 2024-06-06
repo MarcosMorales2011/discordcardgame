@@ -81,6 +81,7 @@ class GameState:
 
     def declare_attackers(self):
         """Handle the Declare Attackers step."""
+        '''Embedded message during combat phase, player selects buttons of numbers based on creature position on their board. After selecting any number of available creatures, press checkmark. Checkmark runs this function. An array of attackers is appended with every creature added and used as the parameter for this function.'''
         print(f"{self.current_player.name} is declaring attackers.")
 
     def declare_blockers(self):
