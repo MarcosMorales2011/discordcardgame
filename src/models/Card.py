@@ -94,3 +94,18 @@ if __name__ == "__main__":
 
     # Print the detailed string representation
     print(str(card))
+
+class Creature(Card):
+    print("Temp")
+    
+class Resource(Card):
+    print("Temp")
+
+class Trap(Card):
+    print("Temp")
+
+class Equipment(Card):
+    print("Temp")
+
+class Technologies(Card):
+    print("Temp")
