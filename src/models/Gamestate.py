@@ -46,7 +46,8 @@ class Gamestate:
     def upkeep_phase(self):
         """Handle the Upkeep phase."""
         for card in self.current_player.battlefield:
-            card.trigger_upkeep()  # Assuming a trigger_upkeep method in Card
+            #card.trigger_upkeep()  # Assuming a trigger_upkeep method in Card
+            print(card.card_type)
         self.next_phase()
 
     def draw_phase(self):
@@ -66,14 +67,44 @@ class Gamestate:
 
     def perform_actions(self):
         print(f"{self.current_player.name} can perform actions now.")
-        # Placeholder for actual game logic to perform actions
-        # This should be replaced with the actual logic for player actions
+        self.current_player.hand.view_hand()
+        action_taken = False
+
+        while not action_taken:
+            action = input(f"{self.current_player.name}, choose an action (play/skip): ").strip().lower()
+
+            if action == "skip":
+                print(f"{self.current_player.name} skips their main phase.")
+                action_taken = True
+
+            elif action == "play":
+                card_name = input("Enter the name of the card you want to play: ").strip()
+
+                card = self.current_player.hand.place_card(card_name)
+                if card:
+                    if card.card_type == "Resource" and self.current_player.land_played:
+                        print(f"{self.current_player.name} cannot play another land this turn.")
+                        self.current_player.hand.cards.append(card)  # Return card to hand
+                    else:
+                        if card.card_type == "Resource":
+                            self.current_player.land_played = True
+                            for resource_type, amount in card.attributes.items():
+                                self.current_player.resource_pool[resource_type] += amount
+                        self.current_player.battlefield.append(card)
+                        print(f"{self.current_player.name} placed {card} onto the battlefield.")
+                        action_taken = True
+                else:
+                    print(f"{self.current_player.name} could not find {card_name} in hand to play.")
+
+            else:
+                print("Invalid action. Please try again.")
+
 
     def combat_phase(self):
         """Handle the Combat phase."""
         print("Entering Combat Phase.")
         attackers = self.select_attackers()
-        if attackers:
+        if attackers.__len__() != 0:
             self.declare_attackers(attackers)
         self.next_phase()
 
@@ -103,6 +134,7 @@ class Gamestate:
         print(f"{self.current_player.name} is declaring attackers.")
         total_attack = 0
         for attacker in attackers:
+            attacker.tap()
             if attacker in self.current_player.battlefield:
                 print(f"{attacker.name} is attacking with {attacker.attributes['attack']} attack.")
                 total_attack += attacker.attributes['attack']
