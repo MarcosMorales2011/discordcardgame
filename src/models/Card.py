@@ -1,5 +1,5 @@
 class Card:
-    def __init__(self, name: str, card_type: str, attributes: dict, cost: dict):
+    def __init__(self, name: str, card_type: str, attributes: dict, cost: dict, upkeep_cost: dict = None, upkeep_ability: callable = None):
         """
         Initialize a card with a name, card type, and attributes.
         
@@ -12,6 +12,8 @@ class Card:
         self.attributes = attributes
         self.cost = cost
         self.tapped = False
+        self.upkeep_cost = upkeep_cost or {}
+        self.upkeep_ability = upkeep_ability
 
     def __repr__(self):
         """

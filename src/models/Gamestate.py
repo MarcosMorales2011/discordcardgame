@@ -46,9 +46,24 @@ class Gamestate:
     def upkeep_phase(self):
         """Handle the Upkeep phase."""
         for card in self.current_player.battlefield:
-            #card.trigger_upkeep()  # Assuming a trigger_upkeep method in Card
+            self.trigger_upkeep(self.current_player, card)  
             print(card.card_type)
         self.next_phase()
+
+    def trigger_upkeep(self, player, card):
+        """
+        Trigger the upkeep ability and handle upkeep costs for a card.
+        
+        :param player: The player who controls the card.
+        :param card: The card with an upkeep trigger.
+        """
+        if card.upkeep_cost:
+            can_pay = player.use_mana(card.upkeep_cost)
+            if not can_pay:
+                print(f"{player.name} cannot pay the upkeep cost for {card.name}. Taking consequences.")
+                # Handle consequences here (e.g., sacrifice the card)
+        if card.upkeep_ability:
+            card.upkeep_ability(player, card)
 
     def draw_phase(self):
         """Handle the Draw phase."""
@@ -156,11 +171,41 @@ class Gamestate:
     def end_step(self):
         """Handle the End Step."""
         print("End Step: resolving end-of-turn effects.")
+        # Handle end-of-turn effects here
 
     def cleanup_step(self):
         """Handle the Cleanup Step."""
-        self.current_player.hand.cleanup()
         print("Cleanup Step: discarding excess cards and removing damage.")
+
+        # Discard excess cards if hand size exceeds maximum (normally seven)
+        max_hand_size = 7
+        while self.current_player.hand.count() > max_hand_size:
+            excess_cards = self.current_player.hand.count() - max_hand_size
+            print(f"{self.current_player.name} has {excess_cards} excess cards.")
+            # Assume discard excess cards method exists in Hand class
+            self.current_player.hand.discard_excess(max_hand_size)
+
+        """### Remove all damage marked on permanents
+        for card in self.current_player.battlefield:
+            if hasattr(card, "damage"):
+                card.damage = 0  # Reset damage to 0
+                print(f"Removed damage from {card.name}.")"""
+
+        # End all "until end of turn" and "this turn" effects
+        for card in self.current_player.battlefield:
+            if hasattr(card, "end_turn_effects"):
+                card.end_turn_effects.clear()  # Clear end turn effects
+                print(f"Cleared end-of-turn effects from {card.name}.")
+
+        # Check for state-based actions or triggered abilities
+        self.check_state_based_actions_and_triggered_abilities()
+
+    def check_state_based_actions_and_triggered_abilities(self):
+        """Check for state-based actions or triggered abilities and handle them."""
+        # Placeholder for checking state-based actions and triggered abilities
+        # If any, put them on the stack and handle priority
+        print("Checking for state-based actions and triggered abilities.")
+        # This can be implemented with more details as needed
 
     def play_turn(self):
         """Play a complete turn for the current player."""
