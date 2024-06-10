@@ -93,6 +93,7 @@ class Gamestate:
                 action_taken = True
 
             elif action == "play":
+                self.current_player.hand.view_hand()
                 card_name = input("Enter the name of the card you want to play: ").strip()
 
                 card = self.current_player.hand.place_card(card_name)

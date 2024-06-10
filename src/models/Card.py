@@ -79,30 +79,50 @@ class Resource(Card):
         return f"Resource: {self.name}\nType: {self.resource_type}\nAmount: {self.amount}\nCost: {self.cost}"
 
 class Trap(Card):
-    def __init__(self, name: str, attributes: dict, cost: dict, trigger_condition: str, triggered: bool):
-        super().__init__(name, "Trap", attributes, cost)
-        self.trigger_condition = trigger_condition
-        self.triggered = triggered
+    def __init__(self, name: str, attributes: dict, cost: int, trigger_condition: str, effect: callable):
+        super().__init__(name, "Trap", attributes, cost, is_trap=True, trigger_condition=trigger_condition, effect=effect)
+        self.triggered = False
 
     def __str__(self):
         attributes_str = ', '.join([f"{key}: {value}" for key, value in self.attributes.items()])
-        return f"Trap: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nTrigger: {self.trigger_condition}"
-    
-    def trigger(self):
+        return f"Trap: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nTrigger Condition: {self.trigger_condition}"
+
+    def trigger(self, game_state, target):
         """
-        Trigger the trap.
+        Trigger the trap's effect.
         """
-        self.triggered = True
+        if not self.triggered:
+            self.triggered = True
+            self.effect(game_state, target)
+            print(f"Trap {self.name} triggered!")
 
 class Equipment(Card):
-    def __init__(self, name: str, attributes: dict, cost: dict, effects: dict):
+    def __init__(self, name: str, attributes: dict, cost: int, attachment_cost: int, effects: dict):
         super().__init__(name, "Equipment", attributes, cost)
+        self.attachment_cost = attachment_cost
         self.effects = effects
+        self.attached_to = None
 
     def __str__(self):
         attributes_str = ', '.join([f"{key}: {value}" for key, value in self.attributes.items()])
         effects_str = ', '.join([f"{key}: {value}" for key, value in self.effects.items()])
-        return f"Equipment: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nEffects: {effects_str}"
+        return f"Equipment: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nAttachment Cost: {self.attachment_cost}\nEffects: {effects_str}"
+
+    def attach_to(self, target_creature):
+        """
+        Attach this equipment to a target creature.
+        """
+        if target_creature:
+            self.attached_to = target_creature
+            target_creature.equipment.append(self)
+            for effect, value in self.effects.items():
+                if effect == "damage":
+                    target_creature.attributes["damage"] += value
+                elif effect == "revival":
+                    target_creature.attributes["alive"] = True
+                ## More Elifs to be added in the future.
+            print(f"{self.name} has been attached to {target_creature.name}.")
+
 
 
 class Technologies(Card):
