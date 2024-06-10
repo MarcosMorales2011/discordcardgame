@@ -1,7 +1,7 @@
 from Hand import Hand
 from Deck import Deck
 from typing import List, Dict
-from Card import Card
+from Card import *
 
 class Player:
     def __init__(self, name: str, discord_id: int, deck: Deck):
@@ -14,11 +14,16 @@ class Player:
         self.land_played = False
         self.mana = 1
         self.max_mana = 10
+        self.graveyard = []
         self.resource_pool = {"Biology": 0, "Chemistry": 0, "Physics": 0, "Robotics": 0}
+        self.damage_reduction = 0
 
+    def reset_damage_reduction(self):
+        self.damage_reduction = 0
+    
     def take_damage(self, damage: int):
-        self.hp -= damage
-        print(f"{self.name} takes {damage} damage and is now at {self.hp} HP.")
+        self.hp -= damage-self.damage_reduction
+        print(f"{self.name} takes {damage-self.damage_reduction} damage and is now at {self.hp} HP.")
 
     def heal(self, amount: int):
         self.hp += amount
@@ -39,6 +44,67 @@ class Player:
         else:
             print(f"{self.name} could not find {card_name} in hand to play.")
 
+    def attach_equipment(self, equipment_name: str, target_creature: Card):
+        equipment = self.hand.place_card(equipment_name)
+        if equipment and isinstance(equipment, Equipment):
+            if equipment.attachment_cost <= self.mana_pool:
+                self.mana_pool -= equipment.attachment_cost
+                target_creature.attributes['attack'] += equipment.effects.get('attack', 0)
+                target_creature.attributes['defense'] += equipment.effects.get('defense', 0)
+                print(f"{equipment.name} attached to {target_creature.name}, giving it {equipment.effects}.")
+            else:
+                print(f"Not enough mana to attach {equipment.name}.")
+                self.hand.cards.append(equipment)  # Return the card to hand
+
+    def use_equipment_on_self(self, equipment_name: str):
+        equipment = self.hand.place_card(equipment_name)
+        if equipment and isinstance(equipment, Equipment):
+            if equipment.attachment_cost <= self.mana_pool:
+                self.mana_pool -= equipment.attachment_cost
+                self.apply_effects(equipment.effects)
+                if equipment.single_use:
+                    self.graveyard.append(equipment)
+                    print(f"{equipment.name} used on {self.name}, applying effects {equipment.effects}. Moved to graveyard.")
+            else:
+                print(f"Not enough mana to use {equipment.name}.")
+                self.hand.cards.append(equipment)  # Return the card to hand
+
+    def apply_effects(self, effects: dict):
+        if 'heal' in effects:
+            self.hp += effects['heal']
+            print(f"{self.name} heals for {effects['heal']} HP.")
+
+    def activate_technology(self, technology_name: str, game_state):
+        technology = self.hand.place_card(technology_name)
+        if technology and isinstance(technology, Technologies):
+            if technology.cost['mana'] <= self.mana_pool:
+                self.mana_pool -= technology.cost['mana']
+                self.resolve_technology_effect(technology, game_state)
+                if technology.single_use:
+                    self.graveyard.append(technology)
+                    print(f"{technology.name} activated and moved to graveyard.")
+            else:
+                print(f"Not enough mana to activate {technology.name}.")
+                self.hand.cards.append(technology)  # Return the card to hand
+
+    def resolve_technology_effect(self, technology, game_state):
+        if technology.spell_effect == "enemy player takes 5 damage":
+            game_state.opponent.take_damage(5)
+        elif technology.spell_effect == "Owner takes -2 damage from all sources":
+            self.shield = -2  # Example implementation
+            print(f"{self.name} now takes -2 damage from all sources.")
+
+    def check_dead_creatures(self):
+        for card in self.battlefield[:]:
+            if card.card_type == "Creature" and card.attributes.get('hp', 0) <= 0:
+                print(f"{card.name} has died.")
+                self.battlefield.remove(card)
+                self.graveyard.append(card)
+                # Remove attached equipment and move to graveyard
+                for equip in card.attributes.get('equipped', []):
+                    print(f"{equip.name} attached to {card.name} has been moved to the graveyard.")
+                    self.graveyard.append(equip)
+    
     def reset_land_played(self):
         self.land_played = False
 

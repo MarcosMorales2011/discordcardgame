@@ -86,7 +86,7 @@ class Gamestate:
         action_taken = False
 
         while not action_taken:
-            action = input(f"{self.current_player.name}, choose an action (play/skip): ").strip().lower()
+            action = input(f"{self.current_player.name}, choose an action (play/attach/activate/skip): ").strip().lower()
 
             if action == "skip":
                 print(f"{self.current_player.name} skips their main phase.")
@@ -111,6 +111,25 @@ class Gamestate:
                         action_taken = True
                 else:
                     print(f"{self.current_player.name} could not find {card_name} in hand to play.")
+            
+            elif action == "attach":
+                self.current_player.hand.view_hand()
+                equipment_name = input("Enter the name of the equipment to attach: ").strip()
+                self.current_player.get_battlefield()
+                target_name = input("Enter the name of the creature to attach it to: ").strip()
+
+                target_creature = next((card for card in self.current_player.battlefield if card.name == target_name), None)
+                if target_creature:
+                    self.current_player.attach_equipment(equipment_name, target_creature)
+                    action_taken = True
+                else:
+                    print(f"{target_name} is not on the battlefield.")
+
+            elif action == "activate":
+                self.current_player.hand.view_hand()
+                technology_name = input("Enter the name of the technology to activate: ").strip()
+                self.current_player.activate_technology(technology_name, self)
+                action_taken = True
 
             else:
                 print("Invalid action. Please try again.")

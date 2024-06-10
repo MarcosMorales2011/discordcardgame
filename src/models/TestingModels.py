@@ -8,8 +8,8 @@ deck1 = Deck()
 deck2 = Deck()
 
 # Add example cards to the decks
-fire_elemental = Creature(name="Fire Elemental", attributes={"attack": 5, "defense": 4}, cost={"Common": 5}, hp=20)
-holy_elemental = Creature(name="Holy Elemental", attributes={"attack": 10, "defense": 1}, cost={"Common": 1}, hp=5000)
+fire_elemental = Creature(name="Fire Elemental", attributes={"attack": 6, "defense": 4, "alive": True, "race": "Elemental" }, cost={"Common": 3}, hp=5)
+holy_elemental = Creature(name="Holy Angel", attributes={"attack": 2, "defense": 1, "alive": True, "race": "Angel"}, cost={"Common": 1}, hp=5)
 
 # Try making 2 cards of every type. For now make each deck a random collection of these 10 cards. Then pint the decks.
 

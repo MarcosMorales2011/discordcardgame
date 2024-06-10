@@ -14,6 +14,7 @@ class Card:
         self.tapped = False
         self.upkeep_cost = upkeep_cost or {}
         self.upkeep_ability = upkeep_ability
+        self.single_use = attributes.get('single_use', False)
 
     def __repr__(self):
         """
@@ -126,10 +127,21 @@ class Equipment(Card):
 
 
 class Technologies(Card):
-    def __init__(self, name: str, attributes: dict, cost: dict, spell_effect: str):
+    def __init__(self, name: str, attributes: dict, cost: dict, spell_effect: dict):
         super().__init__(name, "Technologies", attributes, cost)
         self.spell_effect = spell_effect
 
     def __str__(self):
         attributes_str = ', '.join([f"{key}: {value}" for key, value in self.attributes.items()])
-        return f"Technologies: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nEffect: {self.spell_effect}" 
+        effects_str = ', '.join([f"{key}: {value}" for key, value in self.spell_effect.items()])
+        return f"Technologies: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nEffect: {effects_str}"
+
+    def activate(self, game_state):
+        """Activate the technology's effect."""
+        for effect, value in self.spell_effect.items():
+            if effect == "damage_enemy":
+                game_state.opponent.hp -= value
+                print(f"{game_state.opponent.name} takes {value} damage.")
+            elif effect == "reduce_damage":
+                game_state.current_player.damage_reduction += value
+                print(f"{game_state.current_player.name} takes -{value} damage from all sources.")
