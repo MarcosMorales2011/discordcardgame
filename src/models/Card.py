@@ -80,7 +80,7 @@ class Resource(Card):
         return f"Resource: {self.name}\nType: {self.resource_type}\nAmount: {self.amount}\nCost: {self.cost}"
 
 class Trap(Card):
-    def __init__(self, name: str, attributes: dict, cost: int, trigger_condition: str, effect: callable):
+    def __init__(self, name: str, attributes: dict, cost: dict, trigger_condition: str, effect: callable):
         super().__init__(name, "Trap", attributes, cost, is_trap=True, trigger_condition=trigger_condition, effect=effect)
         self.triggered = False
 
@@ -98,7 +98,7 @@ class Trap(Card):
             print(f"Trap {self.name} triggered!")
 
 class Equipment(Card):
-    def __init__(self, name: str, attributes: dict, cost: int, attachment_cost: int, effects: dict):
+    def __init__(self, name: str, attributes: dict, cost: dict, attachment_cost: dict, effects: dict):
         super().__init__(name, "Equipment", attributes, cost)
         self.attachment_cost = attachment_cost
         self.effects = effects
