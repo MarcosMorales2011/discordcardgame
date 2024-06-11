@@ -42,8 +42,8 @@ laser_handgun=Equipment(name="Laser Handgun", attributes={"On Use": "Increase cr
 cyno_revival_chambers=Equipment(name="Cyno-Revival Chambers", attributes={"On Use": "If creature dies, revive them"}, cost={"Common": 3}, effects={"revival": True})
 
 #Resources
-physics_lab=Resource(name="Physics Lab", resource_type="Physics", amount=1, cost=0)
-chemistry_lab=Resource(name="Chemistry Lab",  resource_type="Chemistry",amount=1, cost=0)
+physics_lab=Resource(name="Physics Lab", resource_type="Physics", amount=1, cost={"Common":0})
+chemistry_lab=Resource(name="Chemistry Lab",  resource_type="Chemistry",amount=1, cost={"Common":0})
 
 
 

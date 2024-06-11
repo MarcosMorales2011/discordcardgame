@@ -114,15 +114,23 @@ class Player:
         print(f"{self.name} now has {self.mana} mana.")
 
     def use_mana(self, cost: dict) -> bool:
-        total_common_cost = cost.get("Common", 0)
-        if self.mana >= total_common_cost:
-            self.mana -= total_common_cost
-            print(f"{self.name} used {total_common_cost} common mana, {self.mana} remaining.")
+        if not isinstance(cost, dict):
+            print("Invalid cost format. Cost must be a dictionary.")
+            return False
+
+        common_cost = cost.get("Common", 0)
+        if self.mana >= common_cost:
+            self.mana -= common_cost
+            print(f"{self.name} used {common_cost} common mana, {self.mana} remaining.")
             return True
-        print(f"{self.name} does not have enough common mana. {self.mana} available, {total_common_cost} needed.")
+        print(f"{self.name} does not have enough common mana. {self.mana} available, {common_cost} needed.")
         return False
 
     def use_resource_mana(self, cost: dict) -> bool:
+        if not isinstance(cost, dict):
+            print("Invalid cost format. Cost must be a dictionary.")
+            return False
+
         for resource_type, amount in cost.items():
             if resource_type != "Common" and self.resource_pool.get(resource_type, 0) < amount:
                 print(f"{self.name} does not have enough {resource_type} mana. {self.resource_pool.get(resource_type, 0)} available, {amount} needed.")
@@ -134,6 +142,10 @@ class Player:
         return True
 
     def can_pay_cost(self, cost: dict) -> bool:
+        if not isinstance(cost, dict):
+            print("Invalid cost format. Cost must be a dictionary.")
+            return False
+
         common_cost = cost.get("Common", 0)
         if self.mana < common_cost:
             return False
@@ -143,6 +155,10 @@ class Player:
         return True
 
     def pay_cost(self, cost: dict):
+        if not isinstance(cost, dict):
+            print("Invalid cost format. Cost must be a dictionary.")
+            return False
+
         self.use_mana({"Common": cost.get("Common", 0)})
         self.use_resource_mana({k: v for k, v in cost.items() if k != "Common"})
 

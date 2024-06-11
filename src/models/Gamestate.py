@@ -34,7 +34,7 @@ class Gamestate:
         if self.turn_counter % 2 == 0:
             self.current_player.increase_mana()
             self.opponent.increase_mana()
-        
+
         self.turn_counter += 1
 
     def untap_phase(self):
@@ -67,9 +67,11 @@ class Gamestate:
 
     def draw_phase(self):
         """Handle the Draw phase."""
-        if self.turn_counter == 1:
+        if self.turn_counter == 1 or 2:
             for x in range(8):
                 self.current_player.hand.draw_card(self.current_player.deck)
+        else:
+            self.current_player.hand.draw_card(self.current_player.deck)
         self.next_phase()
 
     def main_phase(self, phase_num: int):
@@ -160,6 +162,7 @@ class Gamestate:
                 print("Invalid action. Please try again.")
 
 
+
     def can_pay_cost(self, cost):
         """
         Check if the player can pay the cost.
@@ -182,9 +185,11 @@ class Gamestate:
         """Select attackers from the current player's battlefield."""
         print(f"{self.current_player.name}, select attackers for combat:")
         print("Your Battlefield:")
-        for index, card in enumerate(self.current_player.battlefield, start=1):
-            print(f"{index}. {card} ({card.card_type})")
-        
+
+        valid_attackers = [card for card in self.current_player.battlefield if card.card_type == "Creature"]
+        for index, card in enumerate(valid_attackers, start=1):
+            print(f"{index}. {card.name} ({card.card_type}) - Attack: {card.attributes['attack']}")
+
         selected_attackers = []
         while True:
             try:
@@ -192,8 +197,11 @@ class Gamestate:
                 index = int(selection) - 1
                 if index == -1:
                     break
-                selected_attackers.append(self.current_player.battlefield[index])
-                print(f"{self.current_player.battlefield[index].name} selected as an attacker.")
+                if 0 <= index < len(valid_attackers):
+                    selected_attackers.append(valid_attackers[index])
+                    print(f"{valid_attackers[index].name} selected as an attacker.")
+                else:
+                    print("Invalid selection. Please enter a valid number.")
             except (ValueError, IndexError):
                 print("Invalid selection. Please enter a valid number.")
 
@@ -234,17 +242,17 @@ class Gamestate:
 
         # Discard excess cards if hand size exceeds maximum (normally seven)
         max_hand_size = 7
-        while self.current_player.hand.count() > max_hand_size:
+        if self.current_player.hand.count() > max_hand_size:
             excess_cards = self.current_player.hand.count() - max_hand_size
             print(f"{self.current_player.name} has {excess_cards} excess cards.")
-            # Assume discard excess cards method exists in Hand class
-            self.current_player.hand.discard_excess(max_hand_size)
+            self.current_player.hand.discard_excess(max_hand_size, self.current_player.hand.choose_discard())
 
-        """### Remove all damage marked on permanents
+
+        # Remove all damage marked on permanents
         for card in self.current_player.battlefield:
             if hasattr(card, "damage"):
                 card.damage = 0  # Reset damage to 0
-                print(f"Removed damage from {card.name}.")"""
+                print(f"Removed damage from {card.name}.")
 
         # End all "until end of turn" and "this turn" effects
         for card in self.current_player.battlefield:
@@ -254,6 +262,7 @@ class Gamestate:
 
         # Check for state-based actions or triggered abilities
         self.check_state_based_actions_and_triggered_abilities()
+
 
     def check_state_based_actions_and_triggered_abilities(self):
         """Check for state-based actions or triggered abilities and handle them."""
