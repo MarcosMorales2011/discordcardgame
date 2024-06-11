@@ -14,6 +14,7 @@ class Player:
         self.land_played = False
         self.mana = 1
         self.max_mana = 10
+        self.current_mana = self.mana
         self.graveyard = []
         self.resource_pool = {"Biology": 0, "Chemistry": 0, "Physics": 0, "Robotics": 0}
         self.damage_reduction = 0
@@ -22,8 +23,8 @@ class Player:
         self.damage_reduction = 0
     
     def take_damage(self, damage: int):
-        self.hp -= damage-self.damage_reduction
-        print(f"{self.name} takes {damage-self.damage_reduction} damage and is now at {self.hp} HP.")
+        self.hp -= max(0, damage - self.damage_reduction)
+        print(f"{self.name} takes {max(0, damage - self.damage_reduction)} damage and is now at {self.hp} HP.")
 
     def heal(self, amount: int):
         self.hp += amount
@@ -47,8 +48,8 @@ class Player:
     def attach_equipment(self, equipment_name: str, target_creature: Card):
         equipment = self.hand.place_card(equipment_name)
         if equipment and isinstance(equipment, Equipment):
-            if equipment.cost <= self.mana_pool:
-                self.mana_pool -= equipment.cost
+            if equipment.cost <= self.current_mana:
+                self.current_mana -= equipment.cost
                 target_creature.attributes['attack'] += equipment.effects.get('attack', 0)
                 target_creature.attributes['defense'] += equipment.effects.get('defense', 0)
                 print(f"{equipment.name} attached to {target_creature.name}, giving it {equipment.effects}.")
@@ -59,8 +60,8 @@ class Player:
     def use_equipment_on_self(self, equipment_name: str):
         equipment = self.hand.place_card(equipment_name)
         if equipment and isinstance(equipment, Equipment):
-            if equipment.cost <= self.mana_pool:
-                self.mana_pool -= equipment.cost
+            if equipment.cost <= self.current_mana:
+                self.current_mana -= equipment.cost
                 self.apply_effects(equipment.effects)
                 if equipment.single_use:
                     self.graveyard.append(equipment)
@@ -77,8 +78,8 @@ class Player:
     def activate_technology(self, technology_name: str, game_state):
         technology = self.hand.place_card(technology_name)
         if technology and isinstance(technology, Technologies):
-            if technology.cost['mana'] <= self.mana_pool:
-                self.mana_pool -= technology.cost['mana']
+            if technology.cost['mana'] <= self.current_mana:
+                self.current_mana -= technology.cost['mana']
                 self.resolve_technology_effect(technology, game_state)
                 if technology.single_use:
                     self.graveyard.append(technology)
@@ -111,7 +112,8 @@ class Player:
     def increase_mana(self):
         if self.mana < self.max_mana:
             self.mana += 1
-        print(f"{self.name} now has {self.mana} mana.")
+        self.current_mana = self.mana
+        print(f"{self.name} now has {self.mana} max mana and {self.current_mana} current mana.")
 
     def use_mana(self, cost: dict) -> bool:
         if not isinstance(cost, dict):
@@ -119,11 +121,11 @@ class Player:
             return False
 
         common_cost = cost.get("Common", 0)
-        if self.mana >= common_cost:
-            self.mana -= common_cost
-            print(f"{self.name} used {common_cost} common mana, {self.mana} remaining.")
+        if self.current_mana >= common_cost:
+            self.current_mana -= common_cost
+            print(f"{self.name} used {common_cost} common mana, {self.current_mana} remaining.")
             return True
-        print(f"{self.name} does not have enough common mana. {self.mana} available, {common_cost} needed.")
+        print(f"{self.name} does not have enough common mana. {self.current_mana} available, {common_cost} needed.")
         return False
 
     def use_resource_mana(self, cost: dict) -> bool:
@@ -147,7 +149,7 @@ class Player:
             return False
 
         common_cost = cost.get("Common", 0)
-        if self.mana < common_cost:
+        if self.current_mana < common_cost:
             return False
         for resource_type, amount in cost.items():
             if resource_type != "Common" and self.resource_pool.get(resource_type, 0) < amount:
@@ -208,6 +210,7 @@ class Player:
         """
         self.play_card_to_battlefield(card_name)
 
+
     def get_battlefield(self) -> List[Card]:
         """
         Get the current cards on the battlefield.
@@ -230,5 +233,5 @@ class Player:
         
         :return: The current mana.
         """
-        return self.mana
+        return self.current_mana
 

@@ -107,6 +107,9 @@ class Gamestate:
                     if card.card_type == "Resource" and self.current_player.land_played:
                         print(f"{self.current_player.name} cannot play another land this turn.")
                         self.current_player.hand.cards.append(card)  # Return card to hand
+                    elif card.card_type == "Equipment" and card.attributes.get("Attach", True):
+                        print(f"{self.current_player.name} cannot play {card_name} directly. It must be attached to a creature.")
+                        self.current_player.hand.cards.append(card)  # Return card to hand
                     else:
                         if self.current_player.can_pay_cost(card.cost):
                             self.current_player.pay_cost(card.cost)
@@ -122,44 +125,54 @@ class Gamestate:
                             self.current_player.hand.cards.append(card)  # Return card to hand
                 else:
                     print(f"{self.current_player.name} could not find {card_name} in hand to play.")
-            
+
             elif action == "attach":
                 self.current_player.hand.view_hand()
                 equipment_name = input("Enter the name of the equipment to attach: ").strip()
                 equipment = self.current_player.hand.place_card(equipment_name)
 
-                if equipment and self.current_player.can_pay_cost(equipment.cost):
-                    self.current_player.get_battlefield()
-                    target_name = input("Enter the name of the creature to attach it to: ").strip()
-                    target_creature = next((card for card in self.current_player.battlefield if card.name == target_name), None)
-                    if target_creature:
-                        self.current_player.pay_cost(equipment.cost)
-                        self.current_player.attach_equipment(equipment, target_creature)
-                        action_taken = True
+                if equipment and technology.card_type == "Equipment":
+                    if self.current_player.can_pay_cost(equipment.cost):
+                        self.current_player.get_battlefield()
+                        target_name = input("Enter the name of the creature to attach it to: ").strip()
+                        target_creature = next((card for card in self.current_player.battlefield if card.name == target_name), None)
+                        if target_creature:
+                            self.current_player.pay_cost(equipment.cost)
+                            self.current_player.attach_equipment(equipment, target_creature)
+                            action_taken = True
+                        else:
+                            print(f"{target_name} is not on the battlefield.")
+                            self.current_player.hand.cards.append(equipment)  # Return equipment to hand
                     else:
-                        print(f"{target_name} is not on the battlefield.")
-                        self.current_player.hand.cards.append(equipment)  # Return equipment to hand
-                else:
-                    print(f"{self.current_player.name} could not find {equipment_name} in hand to attach or cannot pay the cost.")
+                        print(f"{self.current_player.name} could not find {equipment_name} in hand to attach or cannot pay the cost.")
+                        if equipment:
+                            self.current_player.hand.cards.append(equipment)  # Return equipment to hand
+                else: 
+                    print(f"{self.current_player.name} could not find {equipment_name} in hand to activate or it is not a Equipment card.")
                     if equipment:
-                        self.current_player.hand.cards.append(equipment)  # Return equipment to hand
+                        self.current_player.hand.cards.append(technology)
 
             elif action == "activate":
                 self.current_player.hand.view_hand()
                 technology_name = input("Enter the name of the technology to activate: ").strip()
                 technology = self.current_player.hand.place_card(technology_name)
 
-                if technology and self.current_player.can_pay_cost(technology.cost):
-                    self.current_player.pay_cost(technology.cost)
-                    self.current_player.activate_technology(technology, self)
-                    action_taken = True
+                if technology and technology.card_type == "Technology":
+                    if self.current_player.can_pay_cost(technology.cost):
+                        self.current_player.pay_cost(technology.cost)
+                        self.current_player.activate_technology(technology, self)
+                        action_taken = True
+                    else:
+                        print(f"{self.current_player.name} cannot pay the cost for {technology_name}.")
+                        self.current_player.hand.cards.append(technology)  # Return technology to hand
                 else:
-                    print(f"{self.current_player.name} could not find {technology_name} in hand to activate or cannot pay the cost.")
+                    print(f"{self.current_player.name} could not find {technology_name} in hand to activate or it is not a Technology card.")
                     if technology:
                         self.current_player.hand.cards.append(technology)  # Return technology to hand
 
             else:
                 print("Invalid action. Please try again.")
+
 
 
 

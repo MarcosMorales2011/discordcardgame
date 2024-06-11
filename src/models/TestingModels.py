@@ -38,8 +38,8 @@ anti_personnel_mines=Trap(name="Anti-Personnel Mines", attributes={"damage": 2},
 focused_artillery=Trap(name="Focused Artillery", attributes={"damage":6}, cost={"Common":2, "Physics": 1}, trigger_condition="Opponent Card Placed", effect_name="deal_damage")
 
 #Equipment (Artifacts)
-laser_handgun=Equipment(name="Laser Handgun", attributes={"On Use": "Increase creature damage by 3"}, cost={"Common":2}, effects={"damage_increase":3})
-cyno_revival_chambers=Equipment(name="Cyno-Revival Chambers", attributes={"On Use": "If creature dies, revive them"}, cost={"Common": 3}, effects={"revival": True})
+laser_handgun=Equipment(name="Laser Handgun", attributes={"On Use": "Increase creature damage by 3", "Attach": True}, cost={"Common":2}, effects={"damage_increase":3})
+cyno_revival_chambers=Equipment(name="Cyno-Revival Chambers", attributes={"On Use": "If creature dies, revive them", "Attach": True}, cost={"Common": 3}, effects={"revival": True})
 
 #Resources
 physics_lab=Resource(name="Physics Lab", resource_type="Physics", amount=1, cost={"Common":0})
@@ -77,6 +77,8 @@ player1 = Player(name="Alice", discord_id=12345, deck=deck1)
 player2 = Player(name="Bob", discord_id=67890, deck=deck2)
 
 #Shuffling hands/decks.
+player1.hand.shuffle()
+player2.hand.shuffle()
 player1.hand.shuffle()
 player2.hand.shuffle()
 
