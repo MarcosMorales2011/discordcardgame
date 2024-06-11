@@ -67,7 +67,9 @@ class Gamestate:
 
     def draw_phase(self):
         """Handle the Draw phase."""
-        self.current_player.hand.draw_card(self.current_player.deck)
+        if self.turn_counter == 1:
+            for x in range(8):
+                self.current_player.hand.draw_card(self.current_player.deck)
         self.next_phase()
 
     def main_phase(self, phase_num: int):
@@ -75,7 +77,7 @@ class Gamestate:
             print("Entering Main Phase 1.")
         else:
             print("Entering Main Phase 2.")
-            
+        
         # Allow the player to perform any legal actions such as playing lands, casting spells, or activating abilities
         self.perform_actions()
         self.next_phase()
@@ -86,6 +88,8 @@ class Gamestate:
         action_taken = False
 
         while not action_taken:
+            print(f"Your Common Mana: {self.current_player.get_common_mana()}")
+            print(f"Your Resource Pool: {self.current_player.get_resource_pool()}")
             action = input(f"{self.current_player.name}, choose an action (play/attach/activate/skip): ").strip().lower()
 
             if action == "skip":
@@ -102,37 +106,68 @@ class Gamestate:
                         print(f"{self.current_player.name} cannot play another land this turn.")
                         self.current_player.hand.cards.append(card)  # Return card to hand
                     else:
-                        if card.card_type == "Resource":
-                            self.current_player.land_played = True
-                            for resource_type, amount in card.attributes.items():
-                                self.current_player.resource_pool[resource_type] += amount
-                        self.current_player.battlefield.append(card)
-                        print(f"{self.current_player.name} placed {card} onto the battlefield.")
-                        action_taken = True
+                        if self.current_player.can_pay_cost(card.cost):
+                            self.current_player.pay_cost(card.cost)
+                            if card.card_type == "Resource":
+                                self.current_player.land_played = True
+                                for resource_type, amount in card.attributes.items():
+                                    self.current_player.resource_pool[resource_type] += amount
+                            self.current_player.battlefield.append(card)
+                            print(f"{self.current_player.name} placed {card} onto the battlefield.")
+                            action_taken = True
+                        else:
+                            print(f"{self.current_player.name} cannot pay the cost for {card_name}.")
+                            self.current_player.hand.cards.append(card)  # Return card to hand
                 else:
                     print(f"{self.current_player.name} could not find {card_name} in hand to play.")
             
             elif action == "attach":
                 self.current_player.hand.view_hand()
                 equipment_name = input("Enter the name of the equipment to attach: ").strip()
-                self.current_player.get_battlefield()
-                target_name = input("Enter the name of the creature to attach it to: ").strip()
+                equipment = self.current_player.hand.place_card(equipment_name)
 
-                target_creature = next((card for card in self.current_player.battlefield if card.name == target_name), None)
-                if target_creature:
-                    self.current_player.attach_equipment(equipment_name, target_creature)
-                    action_taken = True
+                if equipment and self.current_player.can_pay_cost(equipment.cost):
+                    self.current_player.get_battlefield()
+                    target_name = input("Enter the name of the creature to attach it to: ").strip()
+                    target_creature = next((card for card in self.current_player.battlefield if card.name == target_name), None)
+                    if target_creature:
+                        self.current_player.pay_cost(equipment.cost)
+                        self.current_player.attach_equipment(equipment, target_creature)
+                        action_taken = True
+                    else:
+                        print(f"{target_name} is not on the battlefield.")
+                        self.current_player.hand.cards.append(equipment)  # Return equipment to hand
                 else:
-                    print(f"{target_name} is not on the battlefield.")
+                    print(f"{self.current_player.name} could not find {equipment_name} in hand to attach or cannot pay the cost.")
+                    if equipment:
+                        self.current_player.hand.cards.append(equipment)  # Return equipment to hand
 
             elif action == "activate":
                 self.current_player.hand.view_hand()
                 technology_name = input("Enter the name of the technology to activate: ").strip()
-                self.current_player.activate_technology(technology_name, self)
-                action_taken = True
+                technology = self.current_player.hand.place_card(technology_name)
+
+                if technology and self.current_player.can_pay_cost(technology.cost):
+                    self.current_player.pay_cost(technology.cost)
+                    self.current_player.activate_technology(technology, self)
+                    action_taken = True
+                else:
+                    print(f"{self.current_player.name} could not find {technology_name} in hand to activate or cannot pay the cost.")
+                    if technology:
+                        self.current_player.hand.cards.append(technology)  # Return technology to hand
 
             else:
                 print("Invalid action. Please try again.")
+
+
+    def can_pay_cost(self, cost):
+        """
+        Check if the player can pay the cost.
+        """
+        for resource, amount in cost.items():
+            if self.current_player.resource_pool.get(resource, 0) < amount:
+                return False
+        return True
 
 
     def combat_phase(self):

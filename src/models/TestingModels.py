@@ -8,7 +8,7 @@ deck1 = Deck()
 deck2 = Deck()
 
 # Add example cards to the decks
-fire_elemental = Creature(name="Fire Elemental", attributes={"attack": 6, "defense": 4, "alive": True, "race": "Elemental" }, cost={"Common": 3}, hp=5)
+fire_elemental = Creature(name="Fire Elemental", attributes={"attack": 6, "defense": 4, "alive": True, "race": "Elemental"}, cost={"Common": 3}, hp=5)
 holy_elemental = Creature(name="Holy Angel", attributes={"attack": 2, "defense": 1, "alive": True, "race": "Angel"}, cost={"Common": 1}, hp=5)
 
 """
@@ -30,28 +30,47 @@ Physics lab, 1 cost, on tap: gain +1 physics
 Health lab, 1 cost, on tap: gain +1 health
 """
 #Technologies(Spells)
-laser_beam = Technologies(name="Laser Beam", attributes={}, cost={}, spell_effect={})
-blue_shield_emitter= Technologies(name="Blue Shield Emitter", attributes={}, cost={}, spell_effect={})
+laser_beam = Technologies(name="Laser Beam", attributes={"single_use": True}, cost={"Common":2, "Physics": 2}, spell_effect={"damage_enemy": 3})
+blue_shield_emitter= Technologies(name="Blue Shield Emitter", attributes={"single_use": True}, cost={"Common": 3}, spell_effect={"reduce_damage": 2, "turn_duration": 1})
 
 #Traps
-anti_personnel_mines=Trap(name="Anti-Personnel Mines", attributes={}, cost={}, trigger_condition="")
-focused_artillery=Trap(name="Focused Artillery", attributes={}, cost={}, trigger_condition="")
+anti_personnel_mines=Trap(name="Anti-Personnel Mines", attributes={"damage": 2}, cost={"Common": 3}, trigger_condition="Attacked", effect_name="deal_damage")
+focused_artillery=Trap(name="Focused Artillery", attributes={"damage":6}, cost={"Common":2, "Physics": 1}, trigger_condition="Opponent Card Placed", effect_name="deal_damage")
 
 #Equipment (Artifacts)
-laser_handgun=Equipment(name="Laser Handgun", attributes={}, cost={}, attachment_cost={}, effects={})
-cyno_revival_chambers=Equipment(name="Cyno-Revival Chambers", attributes={}, cost={}, attachment_cost={}, effects={})
+laser_handgun=Equipment(name="Laser Handgun", attributes={"On Use": "Increase creature damage by 3"}, cost={"Common":2}, effects={"damage_increase":3})
+cyno_revival_chambers=Equipment(name="Cyno-Revival Chambers", attributes={"On Use": "If creature dies, revive them"}, cost={"Common": 3}, effects={"revival": True})
 
 #Resources
-physics_lab=Resource(name="Physics Lab", attributes={}, amount=0, cost=0)
-chemistry_lab=Resource(name="Chemistry Lab", attributes={}, amount=0, cost=0)
+physics_lab=Resource(name="Physics Lab", resource_type="Physics", amount=1, cost=0)
+chemistry_lab=Resource(name="Chemistry Lab",  resource_type="Chemistry",amount=1, cost=0)
 
 
 
 # Try making 2 cards of every type. For now make each deck a random collection of these 10 cards. Then pint the decks.
 
-for x in range(40):
-    deck2.add_card(fire_elemental)
+for x in range(4):
     deck1.add_card(holy_elemental)
+    deck1.add_card(laser_beam)
+    deck1.add_card(blue_shield_emitter)
+    deck1.add_card(anti_personnel_mines)
+    deck1.add_card(focused_artillery)
+    deck1.add_card(laser_handgun)
+    deck1.add_card(cyno_revival_chambers)
+    deck1.add_card(physics_lab)
+    deck1.add_card(chemistry_lab)
+
+    deck2.add_card(holy_elemental)
+    deck2.add_card(laser_beam)
+    deck2.add_card(blue_shield_emitter)
+    deck2.add_card(anti_personnel_mines)
+    deck2.add_card(focused_artillery)
+    deck2.add_card(laser_handgun)
+    deck2.add_card(cyno_revival_chambers)
+    deck2.add_card(physics_lab)
+    deck2.add_card(chemistry_lab)
+
+    
 
 # Create players
 player1 = Player(name="Alice", discord_id=12345, deck=deck1)

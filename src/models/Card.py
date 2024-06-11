@@ -80,8 +80,10 @@ class Resource(Card):
         return f"Resource: {self.name}\nType: {self.resource_type}\nAmount: {self.amount}\nCost: {self.cost}"
 
 class Trap(Card):
-    def __init__(self, name: str, attributes: dict, cost: dict, trigger_condition: str, effect: callable):
-        super().__init__(name, "Trap", attributes, cost, is_trap=True, trigger_condition=trigger_condition, effect=effect)
+    def __init__(self, name: str, attributes: dict, cost: dict, trigger_condition: str, effect_name: str):
+        super().__init__(name, "Trap", attributes, cost)
+        self.trigger_condition = trigger_condition
+        self.effect_name = effect_name
         self.triggered = False
 
     def __str__(self):
@@ -94,20 +96,64 @@ class Trap(Card):
         """
         if not self.triggered:
             self.triggered = True
-            self.effect(game_state, target)
+            self.apply_effect(game_state, target)
             print(f"Trap {self.name} triggered!")
 
+    def apply_effect(self, game_state, target):
+        """
+        Apply the effect based on the effect name.
+        """
+        effects = {
+            "deal_damage": self.deal_damage,
+            "reduce_mana": self.reduce_mana,
+            "apply_debuff": self.apply_debuff,
+            # Add other predefined effects here
+        }
+        effect_method = effects.get(self.effect_name)
+        if effect_method:
+            effect_method(game_state, target)
+        else:
+            print(f"No effect found for {self.effect_name}")
+
+    def deal_damage(self, game_state, target):
+        """
+        Example effect: Deal damage to a target.
+        """
+        damage = self.attributes.get("damage", 0)
+        target.take_damage(damage)
+        print(f"{target.name} takes {damage} damage from trap {self.name}")
+
+    def reduce_mana(self, game_state, target):
+        """
+        Example effect: Reduce target's mana.
+        """
+        mana_reduction = self.attributes.get("mana_reduction", 0)
+        target.mana -= mana_reduction
+        if target.mana < 0:
+            target.mana = 0
+        print(f"{target.name} has {mana_reduction} mana reduced by trap {self.name}")
+
+    def apply_debuff(self, game_state, target):
+        """
+        Example effect: Apply a debuff to a target.
+        """
+        debuff = self.attributes.get("debuff", {})
+        for key, value in debuff.items():
+            if hasattr(target, key):
+                setattr(target, key, getattr(target, key) - value)
+                print(f"{target.name} has {key} reduced by {value} from trap {self.name}")
+
+
 class Equipment(Card):
-    def __init__(self, name: str, attributes: dict, cost: dict, attachment_cost: dict, effects: dict):
+    def __init__(self, name: str, attributes: dict, cost: dict, effects: dict):
         super().__init__(name, "Equipment", attributes, cost)
-        self.attachment_cost = attachment_cost
         self.effects = effects
         self.attached_to = None
 
     def __str__(self):
         attributes_str = ', '.join([f"{key}: {value}" for key, value in self.attributes.items()])
         effects_str = ', '.join([f"{key}: {value}" for key, value in self.effects.items()])
-        return f"Equipment: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nAttachment Cost: {self.attachment_cost}\nEffects: {effects_str}"
+        return f"Equipment: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nAttachment Cost: {self.cost}\nEffects: {effects_str}"
 
     def attach_to(self, target_creature):
         """
@@ -118,11 +164,31 @@ class Equipment(Card):
             target_creature.equipment.append(self)
             for effect, value in self.effects.items():
                 if effect == "damage":
-                    target_creature.attributes["damage"] += value
+                    target_creature.attributes["damage_increase"] += value
                 elif effect == "revival":
-                    target_creature.attributes["alive"] = True
+                    target_creature.attributes["Equipmment": "Revives on death, discards into graveyard after."]
                 ## More Elifs to be added in the future.
             print(f"{self.name} has been attached to {target_creature.name}.")
+    
+    def detach(self):
+        """
+        Detach this equipment from its target creature.
+        """
+        if self.attached_to:
+            self.attached_to.equipment.remove(self)
+            self.attached_to = None
+
+    def handle_revival(self, owner):
+        """
+        Handle the revival effect and move this equipment to the graveyard.
+        """
+        if self.attached_to and self.attached_to.hp <= 0:
+            self.attached_to.attributes["hp"] = 1  # Revive the creature with 1 HP
+            self.attached_to.attributes["alive"] = True
+            print(f"{self.attached_to.name} has been revived by {self.name}.")
+            self.detach()
+            owner.graveyard.append(self)
+            print(f"{self.name} has been moved to the graveyard.")
 
 
 
