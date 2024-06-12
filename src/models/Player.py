@@ -18,7 +18,8 @@ class Player:
         self.graveyard = []
         self.resource_pool = {"Biology": 0, "Chemistry": 0, "Physics": 0, "Robotics": 0}
         self.damage_reduction = 0
-
+        self.traps: List[Trap] = []  # List to hold the player's traps
+        
     def reset_damage_reduction(self):
         self.damage_reduction = 0
     
@@ -35,15 +36,24 @@ class Player:
         if card:
             if card.card_type == "Resource" and self.land_played:
                 print(f"{self.name} cannot play another land this turn.")
+                self.hand.cards.append(card)  # Return card to hand
+            elif card.card_type == "Equipment" and card.attributes.get("Attach", True):
+                print(f"{self.name} cannot play {card_name} directly. It must be attached to a creature.")
+                self.hand.cards.append(card)  # Return card to hand
             else:
-                if card.card_type == "Resource":
-                    self.land_played = True
-                    for resource_type, amount in card.attributes.items():
-                        self.resource_pool[resource_type] += amount
-                self.battlefield.append(card)
-                print(f"{self.name} placed {card} onto the battlefield.")
-        else:
-            print(f"{self.name} could not find {card_name} in hand to play.")
+                if self.can_pay_cost(card.cost):
+                    self.pay_cost(card.cost)
+                    if card.card_type == "Resource":
+                        self.land_played = True
+                        for resource_type, amount in card.attributes.items():
+                            self.resource_pool[resource_type] += amount
+                    self.battlefield.append(card)
+                    if card.card_type == "Trap":
+                        self.traps.append(card)  # Add the trap to the player's traps list
+                    print(f"{self.name} placed {card} onto the battlefield.")
+                else:
+                    print(f"{self.name} cannot pay the cost for {card_name}.")
+                    self.hand.cards.append(card)  # Return card to hand
 
     def attach_equipment(self, equipment_name: str, target_creature: Card):
         equipment = self.hand.place_card(equipment_name)

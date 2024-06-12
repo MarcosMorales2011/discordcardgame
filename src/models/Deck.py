@@ -1,3 +1,4 @@
+import random
 from Card import Card 
 from typing import List, Optional
 
@@ -27,6 +28,11 @@ class Deck:
         
         print(f"Card with name '{card_name}' not found in the deck.")
         return None
+    
+    def shuffle(self):
+        """Shuffle the deck."""
+        random.shuffle(self.cards)
+        print("Deck shuffled.")
 
     def view_deck(self):
         """View all cards in the deck."""

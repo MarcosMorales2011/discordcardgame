@@ -41,6 +41,12 @@ class Gamestate:
         """Handle the Untap phase."""
         for card in self.current_player.battlefield:
             card.untap()  # Assuming an untap method in Card
+        for card in self.current_player.battlefield:
+            if card.card_type == "Resource":
+                card.untap()
+                self.current_player.untap_resource()
+            else:
+                card.untap()
         self.next_phase()
 
     def upkeep_phase(self):
@@ -117,13 +123,17 @@ class Gamestate:
                                 for resource_type, amount in card.attributes.items():
                                     self.current_player.resource_pool[resource_type] += amount
                             self.current_player.battlefield.append(card)
+                            if card.card_type == "Trap":
+                                self.current_player.traps.append(card)  # Add the trap to the player's traps list
                             print(f"{self.current_player.name} placed {card} onto the battlefield.")
                             action_taken = True
+                            self.check_traps("Opponent Card Placed", card)
                         else:
                             print(f"{self.current_player.name} cannot pay the cost for {card_name}.")
                             self.current_player.hand.cards.append(card)  # Return card to hand
                 else:
                     print(f"{self.current_player.name} could not find {card_name} in hand to play.")
+
 
             elif action == "attach":
                 self.current_player.hand.view_hand()
@@ -171,7 +181,6 @@ class Gamestate:
 
             else:
                 print("Invalid action. Please try again.")
-
 
 
 
@@ -235,6 +244,7 @@ class Gamestate:
     def damage_enemy_player(self, attack_points: int):
         self.opponent.take_damage(attack_points)
         print(f"{self.opponent.name} took {attack_points} damage.")
+        self.check_traps("Damage Dealt", attack_points)
 
     def end_phase(self):
         """Handle the End phase."""
@@ -282,6 +292,15 @@ class Gamestate:
         # If any, put them on the stack and handle priority
         print("Checking for state-based actions and triggered abilities.")
         # This can be implemented with more details as needed
+
+    def check_traps(self, condition, trigger):
+        """Check and handle trap cards."""
+        for trap in self.opponent.traps:
+            if trap.condition == condition and trap.check_condition(trigger):
+                print(f"{self.opponent.name} can activate {trap.name}.")
+                activate = input(f"Do you want to activate {trap.name}? (yes/no): ").strip().lower()
+                if activate == "yes":
+                    trap.activate(self.opponent, self.current_player, self)
 
     def play_turn(self):
         """Play a complete turn for the current player."""

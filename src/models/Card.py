@@ -98,6 +98,8 @@ class Trap(Card):
             self.triggered = True
             self.apply_effect(game_state, target)
             print(f"Trap {self.name} triggered!")
+            # Remove the trap from player's traps list
+            game_state.current_player.traps.remove(self)
 
     def apply_effect(self, game_state, target):
         """

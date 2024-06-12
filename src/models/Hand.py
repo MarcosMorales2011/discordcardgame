@@ -7,16 +7,8 @@ class Hand:
     def __init__(self):
         self.cards: List[Card] = []
 
-    def shuffle(deck: Deck):
-        """Shuffle the deck."""
-        random.shuffle(deck.cards)
-        print("Deck shuffled.")
-
     def draw_card(self, deck: Deck) -> Optional[Card]:
         """Draw a card from the top of the deck and add it to the hand."""
-        if len(self.cards) >= 8:
-            print("Hand is full. Cannot draw more cards.")
-            return None
         
         if deck.cards:
             drawn_card = deck.cards.pop(0)

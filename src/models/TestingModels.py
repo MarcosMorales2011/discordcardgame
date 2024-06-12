@@ -70,15 +70,13 @@ for x in range(4):
     deck2.add_card(physics_lab)
     deck2.add_card(chemistry_lab)
 
-    
+deck1.shuffle()  
+deck2.shuffle()  
 
 # Create players
 player1 = Player(name="Alice", discord_id=12345, deck=deck1)
 player2 = Player(name="Bob", discord_id=67890, deck=deck2)
 
-#Shuffling hands/decks.
-player1.hand.shuffle(player1.deck)
-player2.hand.shuffle(player2.deck)
 
 # Initialize the game state
 game_state = Gamestate(player1, player2)
