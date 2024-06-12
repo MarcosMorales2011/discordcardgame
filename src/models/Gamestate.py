@@ -68,8 +68,7 @@ class Gamestate:
     def draw_phase(self):
         """Handle the Draw phase."""
         if self.turn_counter == 1 or 2:
-            for x in range(8):
-                self.current_player.hand.draw_card(self.current_player.deck)
+            self.current_player.hand.draw_initial_hand(self.current_player.deck)
         else:
             self.current_player.hand.draw_card(self.current_player.deck)
         self.next_phase()
@@ -131,7 +130,7 @@ class Gamestate:
                 equipment_name = input("Enter the name of the equipment to attach: ").strip()
                 equipment = self.current_player.hand.place_card(equipment_name)
 
-                if equipment and technology.card_type == "Equipment":
+                if equipment and equipment.card_type == "Equipment":
                     if self.current_player.can_pay_cost(equipment.cost):
                         self.current_player.get_battlefield()
                         target_name = input("Enter the name of the creature to attach it to: ").strip()

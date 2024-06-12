@@ -77,10 +77,8 @@ player1 = Player(name="Alice", discord_id=12345, deck=deck1)
 player2 = Player(name="Bob", discord_id=67890, deck=deck2)
 
 #Shuffling hands/decks.
-player1.hand.shuffle()
-player2.hand.shuffle()
-player1.hand.shuffle()
-player2.hand.shuffle()
+player1.hand.shuffle(player1.deck)
+player2.hand.shuffle(player2.deck)
 
 # Initialize the game state
 game_state = Gamestate(player1, player2)
