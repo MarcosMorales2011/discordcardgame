@@ -127,7 +127,9 @@ class Gamestate:
                                 self.current_player.traps.append(card)  # Add the trap to the player's traps list
                             print(f"{self.current_player.name} placed {card} onto the battlefield.")
                             action_taken = True
-                            self.check_traps_on_card_placed(card)
+                            if card.card_type == "Creature":
+                                self.current_player.check_traps_on_card_placed(card)
+
                         else:
                             print(f"{self.current_player.name} cannot pay the cost for {card_name}.")
                             self.current_player.hand.cards.append(card)  # Return card to hand
