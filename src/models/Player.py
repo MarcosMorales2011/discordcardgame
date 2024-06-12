@@ -79,6 +79,16 @@ class Player:
             else:
                 print(f"Not enough mana to use {equipment.name}.")
                 self.hand.cards.append(equipment)  # Return the card to hand
+                
+    def check_creatures(self):
+        """
+        Check if any creatures have 0 or less HP and move them to the graveyard.
+        """
+        to_remove = [creature for creature in self.battlefield if isinstance(creature, Creature) and creature.hp <= 0]
+        for creature in to_remove:
+            self.battlefield.remove(creature)
+            self.graveyard.append(creature)
+            print(f"{creature.name} has 0 or less HP and is moved to the graveyard.")
 
     def apply_effects(self, effects: dict):
         if 'heal' in effects:
@@ -102,7 +112,7 @@ class Player:
         if technology.spell_effect == "enemy player takes 5 damage":
             game_state.opponent.take_damage(5)
         elif technology.spell_effect == "Owner takes -2 damage from all sources":
-            self.shield = -2  # Example implementation
+            self.damage_reduction = 2
             print(f"{self.name} now takes -2 damage from all sources.")
 
     def check_dead_creatures(self):
@@ -177,14 +187,22 @@ class Player:
     def untap_resource(self, resource_type: str):
         """
         Untap a resource of the given type.
-        
+
         :param resource_type: The type of resource to untap.
         """
         if resource_type in self.resource_pool:
-            self.resource_pool[resource_type] += 1
-            print(f"{self.name} untapped {resource_type}. Remaining pool: {self.resource_pool}.")
+            # Count the number of cards on the battlefield that have the resource_type attribute
+            num_cards_with_attribute = sum(1 for card in self.battlefield if resource_type in card.attributes)
+            
+            # Update resource pool only if the count is different
+            if self.resource_pool[resource_type] != num_cards_with_attribute:
+                self.resource_pool[resource_type] = num_cards_with_attribute
+                print(f"{self.name} untapped {resource_type}. Remaining pool: {self.resource_pool}.")
+            else:
+                print(f"{self.name} already has {resource_type} untapped. No change needed.")
         else:
             print(f"{self.name} does not have {resource_type} to untap.")
+
 
     def get_resource_pool(self) -> Dict[str, int]:
         """

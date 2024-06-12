@@ -49,8 +49,9 @@ chemistry_lab=Resource(name="Chemistry Lab",  resource_type="Chemistry",amount=1
 
 # Try making 2 cards of every type. For now make each deck a random collection of these 10 cards. Then pint the decks.
 
-for x in range(4):
+for x in range(5):
     deck1.add_card(holy_elemental)
+    deck1.add_card(fire_elemental)
     deck1.add_card(laser_beam)
     deck1.add_card(blue_shield_emitter)
     deck1.add_card(anti_personnel_mines)
@@ -61,6 +62,7 @@ for x in range(4):
     deck1.add_card(chemistry_lab)
 
     deck2.add_card(holy_elemental)
+    deck2.add_card(fire_elemental)
     deck2.add_card(laser_beam)
     deck2.add_card(blue_shield_emitter)
     deck2.add_card(anti_personnel_mines)

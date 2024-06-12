@@ -90,7 +90,7 @@ class Trap(Card):
         attributes_str = ', '.join([f"{key}: {value}" for key, value in self.attributes.items()])
         return f"Trap: {self.name}\nAttributes: {attributes_str}\nCost: {self.cost}\nTrigger Condition: {self.trigger_condition}"
 
-    def trigger(self, game_state, target):
+    def trigger(self, game_state, triggering_player, target):
         """
         Trigger the trap's effect.
         """
@@ -99,7 +99,7 @@ class Trap(Card):
             self.apply_effect(game_state, target)
             print(f"Trap {self.name} triggered!")
             # Remove the trap from player's traps list
-            game_state.current_player.traps.remove(self)
+            triggering_player.traps.remove(self)
 
     def apply_effect(self, game_state, target):
         """

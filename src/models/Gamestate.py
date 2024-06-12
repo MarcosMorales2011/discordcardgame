@@ -44,7 +44,7 @@ class Gamestate:
         for card in self.current_player.battlefield:
             if card.card_type == "Resource":
                 card.untap()
-                self.current_player.untap_resource()
+                self.current_player.untap_resource(card.resource_type)
             else:
                 card.untap()
         self.next_phase()
@@ -127,7 +127,7 @@ class Gamestate:
                                 self.current_player.traps.append(card)  # Add the trap to the player's traps list
                             print(f"{self.current_player.name} placed {card} onto the battlefield.")
                             action_taken = True
-                            self.check_traps("Opponent Card Placed", card)
+                            self.check_traps_on_card_placed(card)
                         else:
                             print(f"{self.current_player.name} cannot pay the cost for {card_name}.")
                             self.current_player.hand.cards.append(card)  # Return card to hand
@@ -181,6 +181,10 @@ class Gamestate:
 
             else:
                 print("Invalid action. Please try again.")
+            
+            # Checks for creatures with 0 HP or less and moves them from Battlefield to Graveyard
+            self.current_player.check_creatures()
+            self.opponent.check_creatures()
 
 
 
@@ -240,11 +244,12 @@ class Gamestate:
             else:
                 print(f"{attacker.name} is not on the battlefield and cannot attack.")
         self.damage_enemy_player(total_attack)
+        self.check_traps_on_attack(attackers)
 
     def damage_enemy_player(self, attack_points: int):
         self.opponent.take_damage(attack_points)
         print(f"{self.opponent.name} took {attack_points} damage.")
-        self.check_traps("Damage Dealt", attack_points)
+        #self.check_traps("Damage Dealt", attack_points)
 
     def end_phase(self):
         """Handle the End phase."""
@@ -293,14 +298,26 @@ class Gamestate:
         print("Checking for state-based actions and triggered abilities.")
         # This can be implemented with more details as needed
 
-    def check_traps(self, condition, trigger):
-        """Check and handle trap cards."""
+
+    def check_traps_on_card_placed(self, card):
+        """Check and handle trap cards when a card is placed."""
         for trap in self.opponent.traps:
-            if trap.condition == condition and trap.check_condition(trigger):
+            if trap.trigger_condition == "Opponent Card Placed":
                 print(f"{self.opponent.name} can activate {trap.name}.")
                 activate = input(f"Do you want to activate {trap.name}? (yes/no): ").strip().lower()
                 if activate == "yes":
-                    trap.activate(self.opponent, self.current_player, self)
+                    trap.trigger(self, self.opponent, card)
+
+    def check_traps_on_attack(self, attackers):
+        """Check and handle trap cards when an attack is declared."""
+        for trap in self.opponent.traps:
+            if trap.trigger_condition == "Attacked":
+                print(f"{self.opponent.name} can activate {trap.name}.")
+                activate = input(f"Do you want to activate {trap.name}? (yes/no): ").strip().lower()
+                if activate == "yes":
+                    for attacker in attackers:
+                        trap.trigger(self, self.opponent, attacker)
+
 
     def play_turn(self):
         """Play a complete turn for the current player."""
